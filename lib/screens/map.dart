@@ -1,47 +1,85 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'dart:async';
 
-class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+class MapsPage extends StatefulWidget {
+  static final CameraPosition _cameraPosition = CameraPosition(
+    target: LatLng(-12.05066002842411, -77.03450347022607),
+    zoom: 14.4746,
+  );
+
+  static final CameraPosition _position2 = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(-12.05066002842411, -77.03450347022607),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
 
   @override
-  State<MapPage> createState() => _MapPageState();
+  State<MapsPage> createState() => _MapsPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class _MapsPageState extends State<MapsPage> {
+  Completer<GoogleMapController> _controller = Completer();
+  Location location = new Location();
+
+  bool _serviceEnabled = false;
+  PermissionStatus _permissionGranted = PermissionStatus.granted;
+  LocationData _locationData = LocationData.fromMap({});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: FlutterMap(
-        options: MapOptions(center: LatLng(60, -0.1), zoom: 54),
-        layers: [
-          TileLayerOptions(
-            urlTemplate:
-                "https://api.mapbox.com/styles/v1/71729475/cl3hvexww00bu14rqi6te68xd/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiNzE3Mjk0NzUiLCJhIjoiY2wzaHVzNGczMHZpcjNrcWlta3Z1ZXJhYyJ9.cgUl0Ucah6pOdpVgJgFaSQ",
-            additionalOptions: {
-              'accessToken':
-                  'pk.eyJ1IjoiNzE3Mjk0NzUiLCJhIjoiY2wzaHVzNGczMHZpcjNrcWlta3Z1ZXJhYyJ9.cgUl0Ucah6pOdpVgJgFaSQ',
-              'id': 'mapbox.mapbox-streets-v8'
-            },
-            attributionBuilder: (_) {
-              return Text("© OpenStreetMap contributors");
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.location_on),
+          onPressed: () {
+            getLocation();
+          }),
+      body: Stack(
+        children: [
+          //Mapp
+          GoogleMap(
+            myLocationButtonEnabled: true,
+            mapType: MapType.normal,
+            initialCameraPosition: MapsPage._cameraPosition,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
             },
           ),
-          MarkerLayerOptions(markers: [
-            Marker(
-                width: 100,
-                height: 100,
-                point: LatLng(51.5, -0.1),
-                builder: (ctx) => Container(
-                      child: FlutterLogo(),
-                    ))
-          ])
+          Positioned(
+              top: 50.0,
+              left: 10.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ))
         ],
       ),
     );
+  }
+
+  void getLocation() async {
+    print('${_locationData.latitude}, ${_locationData.longitude}');
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _locationData = await location.getLocation();
+    setState(() {});
   }
 }

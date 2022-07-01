@@ -4,6 +4,7 @@ import 'package:flutter_golang_yt/colors/app_colors.dart';
 import 'package:flutter_golang_yt/screens/add_task.dart';
 import 'package:flutter_golang_yt/screens/all_tasks.dart';
 import 'package:flutter_golang_yt/screens/map.dart';
+import 'package:flutter_golang_yt/screens/ubicacion.dart';
 import 'package:flutter_golang_yt/ui/portada.dart';
 import 'package:flutter_golang_yt/widgets/button_widget.dart';
 import 'package:get/get.dart';
@@ -44,17 +45,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ]),
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height / 3,
+                height: MediaQuery.of(context).size.height / 4,
               ),
               InkWell(
                 onTap: () {
-                  Get.to(() => AddZone(),
+                  Get.to(() => MapsPage(),
                       transition: Transition.fade,
                       duration: Duration(seconds: 1));
                 },
                 child: ButtonWidget(
                     backgroundcolor: Colors.green,
-                    text: "-",
+                    text: "Mostrar Mapa",
                     textColor: Colors.black),
               ),
               const SizedBox(
@@ -83,6 +84,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ButtonWidget(
                     backgroundcolor: Colors.purpleAccent,
                     text: "Registro de zonas ",
+                    textColor: Colors.black),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              InkWell(
+                onTap: () {
+                  Get.to(() => obtenerUbi(),
+                      transition: Transition.fade,
+                      duration: Duration(seconds: 1));
+                },
+                child: ButtonWidget(
+                    backgroundcolor: Colors.purpleAccent,
+                    text: "Obtener Ubicación ",
                     textColor: Colors.black),
               )
             ]),
